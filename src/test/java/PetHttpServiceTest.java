@@ -1,20 +1,20 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pet.entry.Category;
-import pet.entry.Pet;
-import pet.PetHTTP;
-import pet.entry.Tag;
+import pet.PetHttpService;
+import pet.petEntity.Category;
+import pet.petEntity.Pet;
+import pet.petEntity.Tag;
 
 import java.io.IOException;
 import java.util.*;
 
-public class PetHTTPTest {
-    private PetHTTP petHTTP;
+public class PetHttpServiceTest {
+    private PetHttpService petHTTP;
 
     @BeforeEach
     public void beforeEach() {
-        petHTTP = new PetHTTP();
+        petHTTP = new PetHttpService();
     }
 
     @Test

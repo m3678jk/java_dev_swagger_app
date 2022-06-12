@@ -1,4 +1,4 @@
-package pet.entry;
+package pet.petEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class Pet {
-    private int id;
+    private long id;
     private Category category;
     private String name;
     private List<String> photoUrls;

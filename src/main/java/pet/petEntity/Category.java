@@ -1,12 +1,14 @@
-package pet.entry;
+package pet.petEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Tag {
+public class Category {
+
     private int id;
     private String name;
-}
 
+
+}

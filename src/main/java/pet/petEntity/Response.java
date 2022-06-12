@@ -1,4 +1,4 @@
-package pet.entry;
+package pet.petEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

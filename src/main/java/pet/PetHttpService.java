@@ -1,18 +1,16 @@
 package pet;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import lombok.Data;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
-import pet.entry.Category;
-import pet.entry.Pet;
-import pet.entry.Tag;
-import pet.entry.Response;
+import pet.petEntity.Pet;
+import pet.petEntity.Response;
 
-import javax.xml.crypto.dsig.XMLObject;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -20,11 +18,9 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Data
-public class PetHTTP {
+public class PetHttpService {
     private int responseStatus;
     public static final String URL = "https://petstore.swagger.io/";
     public static final Gson GSON = new Gson();
@@ -35,18 +31,18 @@ public class PetHTTP {
 
     //  nok
     //  how to say in request that requestBody it is additionalMetadata, fileInStringFormat - picture to upload?
-    //  need some tip pls :) but with Jsoup it probably works..
+    //  but with Jsoup it probably works..
     public Response uploadImage(int petId, String additionalData, String pathToFile) throws IOException, InterruptedException {
-        final String requestBody = GSON.toJson("additionalMetadata="+ additionalData);
-
+        final String requestBody = "additionalMetadata="+ additionalData;
+        HttpRequest.BodyPublishers bodyPublishers;
         System.out.println("requestBody = " + requestBody);
         String fileInStringFormat = converterFileToBytesToString(pathToFile);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL + "v2/pet/" + petId + "/uploadImage"))
-                //.method("POST",HttpRequest.BodyPublishers.ofString(requestBody))
-                .POST(HttpRequest.BodyPublishers.ofString(fileInStringFormat))
                 .setHeader("accept", "application/json")
                 .setHeader("Content-type", "multipart/form-data")
+                .method("POST",HttpRequest.BodyPublishers.ofString(requestBody))
+                .POST(HttpRequest.BodyPublishers.ofFile(Path.of(pathToFile)))
                 .build();
         System.out.println("request = " + request);
         HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
@@ -55,11 +51,8 @@ public class PetHTTP {
 
 
     }
-
+    //ok
     public Response uploadImageJsoupVersion(int petId, String additionalData, String pathToFile) throws IOException, InterruptedException {
-
-        String fileInStringFormat = converterFileToBytesToString(pathToFile);
-
         // magic it seems to be ok
         Connection.Response execute = Jsoup.connect(URL + "v2/pet/" + petId + "/uploadImage")
                 .header("Content-Type", "multipart/form-data")
@@ -75,7 +68,6 @@ public class PetHTTP {
         int statusCode = execute.statusCode();
         // System.out.println(statusCode);
        // System.out.println(execute.body());
-
         return GSON.fromJson(execute.body(), Response.class);
 
     }
@@ -114,6 +106,23 @@ public class PetHTTP {
         }
 
         return GSON.fromJson(response.body(), Pet.class);
+    }
+
+    public Response delete(int id) throws IOException, InterruptedException {
+        if(getPetById(id)==null){
+            System.out.println("Pet with id "+ id + " not found");
+        }
+        HttpRequest request = HttpRequest
+                .newBuilder()
+                .uri(URI.create(URL + "v2/pet/" + id))
+                .header("api_key", "special-key")
+                .setHeader("accept", "application/json")
+                .DELETE()
+                .build();
+        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        setResponseStatus(response.statusCode());
+        return GSON.fromJson(response.body(), Response.class);
+
     }
 
     //ok
@@ -155,9 +164,29 @@ public class PetHTTP {
         setResponseStatus(response.statusCode());
 
         return GSON.fromJson(response.body(), Response.class);
-
     }
 
+
+    //ok
+    public List<Pet> getListOfPetByStatus( Pet.Status status) throws IOException, InterruptedException {
+        List<Pet> pets = new ArrayList<Pet>();
+        HttpRequest request = HttpRequest
+                .newBuilder()
+                .uri(URI.create(URL + "v2/pet/findByStatus?status=" + status))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        setResponseStatus(response.statusCode());
+
+        Type typeToken = TypeToken
+                .getParameterized(List.class, Pet.class)
+                .getType();
+        pets = GSON.fromJson(response.body(), typeToken);
+        return pets;
+
+
+    }
 
 
     public String converterFileToBytesToString(String ImageName) throws IOException {
@@ -170,12 +199,13 @@ public class PetHTTP {
 class TestPet {
     public static void main(String[] args) throws IOException, InterruptedException {
         String pathToPic = "C:\\Java\\jm\\SwaggerApp\\src\\main\\resources\\images2.jpg";
-        PetHTTP petHTTP = new PetHTTP();
+        PetHttpService petHTTP = new PetHttpService();
 //        String s = petHTTP.converterFileToBytesToString(pathToPic);
 //        System.out.println("s = " + s);
         //System.out.println("petHTTP.getPetById(777) = " + petHTTP.getPetById(777));
-        System.out.println(petHTTP.uploadImageJsoupVersion(96998071, "info", pathToPic));
-
+ //      System.out.println(petHTTP.uploadImageJsoupVersion(96998071, "info", pathToPic));
+//        System.out.println(petHTTP.uploadImage(96998071, "info", pathToPic));
+//
         //   System.out.println(petHTTP.getPetById(4789));
 //        System.out.println(petHTTP.updatePet(768 , new Pet(2222222,
 //                new Category(0, "animal"), "Baloo best", new ArrayList<String>(List.of("string")),
@@ -183,6 +213,8 @@ class TestPet {
 //                Pet.Status.available)));
 
        // System.out.println(petHTTP.updatePetNameAndStatus(96998071, "newName", Pet.Status.available));
-
+      //  System.out.println(petHTTP.getListOfPetByStatus(Pet.Status.available));
+       // https://petstore.swagger.io/v2/pet/findByStatus?status=sold
+        System.out.println(petHTTP.delete(111));
     }
 }
