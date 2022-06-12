@@ -3,12 +3,15 @@ package pet;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.Data;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 import pet.entry.Category;
 import pet.entry.Pet;
 import pet.entry.Tag;
 import pet.entry.Response;
 
 import javax.xml.crypto.dsig.XMLObject;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -32,7 +35,7 @@ public class PetHTTP {
 
     //  nok
     //  how to say in request that requestBody it is additionalMetadata, fileInStringFormat - picture to upload?
-    //  need some tip pls :)
+    //  need some tip pls :) but with Jsoup it probably works..
     public Response uploadImage(int petId, String additionalData, String pathToFile) throws IOException, InterruptedException {
         final String requestBody = GSON.toJson("additionalMetadata="+ additionalData);
 
@@ -49,6 +52,32 @@ public class PetHTTP {
         HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         System.out.println("response.statusCode() = " + response.statusCode());
         return GSON.fromJson(response.body(), Response.class);
+
+
+    }
+
+    public Response uploadImageJsoupVersion(int petId, String additionalData, String pathToFile) throws IOException, InterruptedException {
+
+        String fileInStringFormat = converterFileToBytesToString(pathToFile);
+
+        // magic it seems to be ok
+        Connection.Response execute = Jsoup.connect(URL + "v2/pet/" + petId + "/uploadImage")
+                .header("Content-Type", "multipart/form-data")
+                .header("Accept", "application/json")
+                .followRedirects(true)
+                .ignoreHttpErrors(true)
+                .ignoreContentType(true)
+                .method(Connection.Method.POST)
+                .data("additionalMetadata", additionalData)
+                .data("file", "image.jpg", new FileInputStream(pathToFile))
+                .execute();
+        System.out.println(execute);
+        int statusCode = execute.statusCode();
+        // System.out.println(statusCode);
+       // System.out.println(execute.body());
+
+        return GSON.fromJson(execute.body(), Response.class);
+
     }
 
 
@@ -145,7 +174,7 @@ class TestPet {
 //        String s = petHTTP.converterFileToBytesToString(pathToPic);
 //        System.out.println("s = " + s);
         //System.out.println("petHTTP.getPetById(777) = " + petHTTP.getPetById(777));
-        petHTTP.uploadImage(96998071, "info", pathToPic);
+        System.out.println(petHTTP.uploadImageJsoupVersion(96998071, "info", pathToPic));
 
         //   System.out.println(petHTTP.getPetById(4789));
 //        System.out.println(petHTTP.updatePet(768 , new Pet(2222222,
