@@ -1,5 +1,10 @@
 
+import cli.CliService;
 import com.google.gson.Gson;
+import pet.PetHttpService;
+import store.StoreHttpService;
+import user.UserHttpService;
+
 import java.net.http.HttpClient;
 
 
@@ -15,6 +20,7 @@ public class App {
         GET, POST, DELETE, PUT
     }
     public static void main(String[] args) {
+        new CliService(new PetHttpService(), new UserHttpService(), new StoreHttpService());
 
     }
 }
