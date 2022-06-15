@@ -11,7 +11,7 @@ public class Order {
     private long id;
     private long petId;
     private int quantity;
-    private String shipDate; //string?
+    private String shipDate;
     private Status status;
     boolean complete;
 

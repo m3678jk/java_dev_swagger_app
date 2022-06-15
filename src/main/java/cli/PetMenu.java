@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PetMenuPlace extends MenuPlace {
-    public PetMenuPlace(CliService cliService) {
+public class PetMenu extends Menu {
+    private String command;
+
+    public PetMenu(CliService cliService) {
         super(cliService);
     }
-
-    private String command;
 
     @Override
     public void init() {
@@ -28,7 +28,6 @@ public class PetMenuPlace extends MenuPlace {
                         "6 - update a pet with the form\n" +
                         "7 - delete\n" +
                         "8 - return to main menu");
-
 
         while (true) {
             command = cliService.getScanner().nextLine();
@@ -47,7 +46,6 @@ public class PetMenuPlace extends MenuPlace {
                     break;
                 case "5":
                     findPetById();
-
                     break;
                 case "6":
                     updatePetWithForm();
@@ -58,7 +56,6 @@ public class PetMenuPlace extends MenuPlace {
                 case "8":
                     returnToMainMenu();
                     break;
-
                 default:
                     unknownCommand(command);
             }
@@ -81,14 +78,12 @@ public class PetMenuPlace extends MenuPlace {
                             System.out.println("Result:" + cliService.getPetHttpService().delete(Integer.parseInt(command)) + "\n");
                     } catch (NumberFormatException ex) {
                         unknownCommand(command);
-
                     }
                 }
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
         }
-
     }
 
     private void uploadImage() {
@@ -144,8 +139,9 @@ public class PetMenuPlace extends MenuPlace {
                     try {
                         if (cliService.getPetHttpService().getPetById(Integer.parseInt(command)) == null) {
                             continue;
-                        } else
+                        } else {
                             System.out.println("Result:" + cliService.getPetHttpService().getPetById(Integer.parseInt(command)) + "\n");
+                        }
                     } catch (NumberFormatException ex) {
                         unknownCommand(command);
 
@@ -155,12 +151,10 @@ public class PetMenuPlace extends MenuPlace {
                 exception.printStackTrace();
             }
         }
-
     }
 
-
     private void findPetByStatus() {
-    //TODO something is wrong with commands handler
+        //TODO something is wrong with commands handler
         while (true) {
             Pet.Status status = null;
             try {
@@ -329,8 +323,6 @@ public class PetMenuPlace extends MenuPlace {
                 exception.printStackTrace();
             }
         }
-
-
     }
 
     private void updatePetWithForm() {
@@ -363,7 +355,7 @@ public class PetMenuPlace extends MenuPlace {
                     }
                 }
 
-                System.out.println("Result:" + cliService.getPetHttpService().updatePetNameAndStatus(id, petName,status) + "\n");
+                System.out.println("Result:" + cliService.getPetHttpService().updatePetNameAndStatus(id, petName, status) + "\n");
                 Thread.sleep(5000);
                 returnToPetMenu();
 
@@ -374,13 +366,9 @@ public class PetMenuPlace extends MenuPlace {
     }
 
     private void returnToPetMenu() {
-        cliService.setMenu(new PetMenuPlace(cliService));
-    }
+        cliService.setMenu(new PetMenu(cliService));
 
-    private void returnToMainMenu() {
-        cliService.openMainMenu();
     }
-
 }
 
 

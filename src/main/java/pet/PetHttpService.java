@@ -17,6 +17,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.*;
 
 @Data
@@ -29,31 +30,9 @@ public class PetHttpService {
             .version(HttpClient.Version.HTTP_1_1)
             .build();
 
-    //  nok
-    //  how to say in request that requestBody it is additionalMetadata, fileInStringFormat - picture to upload?
-    //  but with Jsoup it probably works..
-    public Response uploadImage(int petId, String additionalData, String pathToFile) throws IOException, InterruptedException {
-        final String requestBody = "additionalMetadata="+ additionalData;
-        HttpRequest.BodyPublishers bodyPublishers;
-        System.out.println("requestBody = " + requestBody);
-        String fileInStringFormat = converterFileToBytesToString(pathToFile);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL + "v2/pet/" + petId + "/uploadImage"))
-                .setHeader("accept", "application/json")
-                .setHeader("Content-type", "multipart/form-data")
-                .method("POST",HttpRequest.BodyPublishers.ofString(requestBody))
-                .POST(HttpRequest.BodyPublishers.ofFile(Path.of(pathToFile)))
-                .build();
-        System.out.println("request = " + request);
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println("response.statusCode() = " + response.statusCode());
-        return GSON.fromJson(response.body(), Response.class);
 
-
-    }
-    //ok
     public Response uploadImageJsoupVersion(int petId, String additionalData, String pathToFile) throws IOException, InterruptedException {
-        // magic it seems to be ok
+
         Connection.Response execute = Jsoup.connect(URL + "v2/pet/" + petId + "/uploadImage")
                 .header("Content-Type", "multipart/form-data")
                 .header("Accept", "application/json")
@@ -64,16 +43,10 @@ public class PetHttpService {
                 .data("additionalMetadata", additionalData)
                 .data("file", "image.jpg", new FileInputStream(pathToFile))
                 .execute();
-        System.out.println(execute);
-        int statusCode = execute.statusCode();
-        // System.out.println(statusCode);
-       // System.out.println(execute.body());
-        return GSON.fromJson(execute.body(), Response.class);
 
+        return GSON.fromJson(execute.body(), Response.class);
     }
 
-
-    //ok
     public HashMap<Pet, Integer> createNewPet(Pet pet) throws IOException, InterruptedException {
         final String requestBody = GSON.toJson(pet);
 
@@ -91,7 +64,6 @@ public class PetHttpService {
 
     }
 
-    //ok
     public Pet getPetById(int id) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest
                 .newBuilder()
@@ -104,7 +76,6 @@ public class PetHttpService {
             System.out.println("Pet not found");
             return null;
         }
-
         return GSON.fromJson(response.body(), Pet.class);
     }
 
@@ -122,13 +93,11 @@ public class PetHttpService {
         HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         setResponseStatus(response.statusCode());
         return GSON.fromJson(response.body(), Response.class);
-
     }
 
-    //ok
     public Pet updatePet(int id, Pet petAfter) throws IOException, InterruptedException {
         if (getPetById(id) == null) {
-            System.out.println("Pet with " + id + "does not exist");
+            System.out.println("Pet with " + id + " does not exist");
             return null;
         }
         final String requestBody = GSON.toJson(petAfter);
@@ -184,10 +153,7 @@ public class PetHttpService {
                 .getType();
         pets = GSON.fromJson(response.body(), typeToken);
         return pets;
-
-
     }
-
 
     public String converterFileToBytesToString(String ImageName) throws IOException {
         byte[] bytes = Files.readAllBytes(Path.of(ImageName));
@@ -215,6 +181,8 @@ class TestPet {
        // System.out.println(petHTTP.updatePetNameAndStatus(96998071, "newName", Pet.Status.available));
       //  System.out.println(petHTTP.getListOfPetByStatus(Pet.Status.available));
        // https://petstore.swagger.io/v2/pet/findByStatus?status=sold
-        System.out.println(petHTTP.delete(111));
+      //  System.out.println(petHTTP.delete(111));
+
+
     }
 }

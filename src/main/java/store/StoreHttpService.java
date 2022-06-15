@@ -2,8 +2,6 @@ package store;
 
 import com.google.gson.Gson;
 import lombok.Data;
-import org.jsoup.select.CombiningEvaluator;
-import pet.petEntity.Pet;
 import pet.petEntity.Response;
 import store.storeEntity.Inventory;
 import store.storeEntity.Order;
@@ -48,7 +46,7 @@ public class StoreHttpService {
         HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         setResponseStatus(response.statusCode());
         if (getResponseStatus() != 200) {
-            System.out.println("Pet not found");
+            System.out.println("Order not found");
             return null;
         }
         return GSON.fromJson(response.body(), Order.class);
@@ -89,7 +87,7 @@ public class StoreHttpService {
 class StoreHttpServiceTest{
     public static void main(String[] args) throws IOException, InterruptedException {
         StoreHttpService storeHttpService = new StoreHttpService();
-       // System.out.println(storeHttpService.placeOrder(new Order(17l, 5l, 1, String.valueOf(LocalDate.now()), Order.Status.placed, true)));
+        System.out.println(storeHttpService.placeOrder(new Order(17l, 5l, 1, String.valueOf(LocalDate.now()), Order.Status.placed, true)));
         //System.out.println(storeHttpService.getOrderById(1));
         //System.out.println(storeHttpService.getInventory());
         //System.out.println(storeHttpService.delete(1));

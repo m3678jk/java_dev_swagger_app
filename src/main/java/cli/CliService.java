@@ -8,14 +8,16 @@ import user.UserHttpService;
 import java.util.Scanner;
 
 public class CliService {
-    private MenuPlace menuPlace;
+    private Menu menu;
 
     @Getter
     private Scanner scanner;
 
     @Getter
     private PetHttpService petHttpService;
+    @Getter
     private UserHttpService userHttpService;
+    @Getter
     private StoreHttpService storeHttpService;
 
 
@@ -24,7 +26,7 @@ public class CliService {
         this.userHttpService = userHttpService;
         this.storeHttpService = storeHttpService;
 
-        menuPlace = new MainMenu(this);
+        menu = new MainMenu(this);
 
         scanner = new Scanner(System.in);
 
@@ -32,11 +34,11 @@ public class CliService {
     }
 
 
-    private void openMainMenu() {
+    public void openMainMenu() {
         System.out.println("Press:\n" +
-                "1 - to open Pet menu\n" +
-                "2 - to open User menu\n" +
-                "3 - to open Store menu\n" +
+                "1 - open Pet menu\n" +
+                "2 - open User menu\n" +
+                "3 - open Store menu\n" +
                 "4 - exit");
         while (true) {
             String command = scanner.nextLine();
@@ -61,25 +63,28 @@ public class CliService {
         }
     }
 
-    private void goToStoreMenu() {
-        //TODO
+
+    public void goToStoreMenu() {
+        menu.goToStoreMenu();
+        setMenu(new StoreMenu(menu.cliService));
     }
 
-    private void goToUserMenu() {
-        //TODO
+    public void goToUserMenu() {
+        menu.goToUserMenu();
+        setMenu(new UserMenu(menu.cliService));
     }
 
-    private void goToPetMenu() {
-        menuPlace.goToPetMenu();
-
+    public void goToPetMenu() {
+        menu.goToPetMenu();
+        setMenu(new PetMenu(menu.cliService));
     }
 
     public void unknownCommand(String cmd) {
-        System.out.println("Unknown command: " + cmd);
+        System.out.println("Unknown commandCLI: " + cmd);
     }
 
-    public void setMenu(MenuPlace menuPlace) {
-        this.menuPlace = menuPlace;
-        menuPlace.init();
+    public void setMenu(Menu menu) {
+        this.menu = menu;
+        menu.init();
     }
 }
